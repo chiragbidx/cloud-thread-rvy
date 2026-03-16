@@ -1,19 +1,12 @@
 "use server";
 
-import { z } from "zod";
 import { db } from "@/lib/db/client";
 import { clients } from "@/lib/db/schema";
 import { getAuthSession } from "@/lib/auth/session";
 import { eq, and, desc, ilike } from "drizzle-orm";
+import { clientInputSchema } from "./schemas";
 
-export const clientInputSchema = z.object({
-  name: z.string().min(2).max(120),
-  contactEmail: z.string().email(),
-  company: z.string().optional(),
-  notes: z.string().optional(),
-});
-
-export async function createClient(input: z.infer<typeof clientInputSchema>) {
+export async function createClient(input: any) {
   const session = await getAuthSession();
   if (!session) throw new Error("Unauthorized");
 
@@ -38,7 +31,7 @@ export async function createClient(input: z.infer<typeof clientInputSchema>) {
 
 export async function updateClient(
   id: string,
-  input: Partial<z.infer<typeof clientInputSchema>>
+  input: Partial<any>
 ) {
   const session = await getAuthSession();
   if (!session) throw new Error("Unauthorized");
