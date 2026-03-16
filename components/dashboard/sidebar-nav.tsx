@@ -10,6 +10,8 @@ import {
   Settings,
   Users,
   CreditCard,
+  FileText,
+  Contact2,
 } from "lucide-react";
 import {
   Collapsible,
@@ -29,11 +31,8 @@ const sections: { title: string; items: NavItem[] }[] = [
     title: "Platform",
     items: [
       { label: "Overview", href: "/dashboard", icon: Home },
-      {
-        label: "Feature",
-        href: "/dashboard/feature",
-        icon: Hammer,
-      },
+      { label: "Contracts", href: "/dashboard/contracts", icon: FileText },
+      { label: "Clients", href: "/dashboard/clients", icon: Contact2 },
     ],
   },
   {
@@ -42,6 +41,16 @@ const sections: { title: string; items: NavItem[] }[] = [
       { label: "Team", href: "/dashboard/team", icon: Users },
       { label: "Billing", href: "#", icon: CreditCard, disabled: true },
       { label: "Settings", href: "/dashboard/settings", icon: Settings },
+    ],
+  },
+  {
+    title: "Beta",
+    items: [
+      {
+        label: "Feature",
+        href: "/dashboard/feature",
+        icon: Hammer,
+      },
     ],
   },
 ];
