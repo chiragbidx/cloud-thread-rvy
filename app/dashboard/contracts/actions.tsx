@@ -6,7 +6,6 @@ import { contracts, contractActivities, contractStatus } from "@/lib/db/schema";
 import { getAuthSession } from "@/lib/auth/session";
 import { eq, and, desc, ilike, or } from "drizzle-orm";
 import { getOpenAIClient, DEFAULT_OPENAI_MODEL } from "@/lib/openai";
-import { v4 as uuidv4 } from "uuid";
 
 // SCHEMAS
 export const contractInputSchema = z.object({
@@ -34,7 +33,7 @@ export async function createContract(input: z.infer<typeof contractInputSchema>)
   const validated = contractInputSchema.safeParse(input);
   if (!validated.success) return { error: validated.error.message };
 
-  const contractId = uuidv4();
+  const contractId = crypto.randomUUID();
 
   await db.insert(contracts).values({
     id: contractId,
