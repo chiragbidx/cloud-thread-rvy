@@ -1,32 +1,15 @@
 "use server";
 
-import { z } from "zod";
 import { db } from "@/lib/db/client";
 import { contracts, contractActivities, contractStatus } from "@/lib/db/schema";
 import { getAuthSession } from "@/lib/auth/session";
 import { eq, and, desc, ilike, or } from "drizzle-orm";
 import { getOpenAIClient, DEFAULT_OPENAI_MODEL } from "@/lib/openai";
+import { contractInputSchema, generateContractSchema } from "./schemas";
 
-// SCHEMAS
-export const contractInputSchema = z.object({
-  clientId: z.string().min(1, "Client is required"),
-  title: z.string().min(3).max(255),
-  contractType: z.string().min(2).max(80),
-  content: z.string().min(50),
-  status: z.enum(contractStatus),
-  generatedByAI: z.boolean().optional(),
-  aiPrompt: z.string().optional(),
-  aiModel: z.string().optional(),
-});
+// async server-only exports
 
-export const generateContractSchema = z.object({
-  contractType: z.string().min(3),
-  parties: z.string().min(3),
-  variables: z.string().min(3),
-  prompt: z.string().optional(),
-});
-
-export async function createContract(input: z.infer<typeof contractInputSchema>) {
+export async function createContract(input: any) {
   const session = await getAuthSession();
   if (!session) throw new Error("Unauthorized");
 
@@ -60,7 +43,7 @@ export async function createContract(input: z.infer<typeof contractInputSchema>)
 
 export async function updateContract(
   id: string,
-  input: Partial<z.infer<typeof contractInputSchema>>
+  input: Partial<any>
 ) {
   const session = await getAuthSession();
   if (!session) throw new Error("Unauthorized");
@@ -191,19 +174,15 @@ export async function getContractById(id: string) {
 }
 
 // ---- AI Generation ----
-export async function generateAIDraftContract({
-  contractType,
-  parties,
-  variables,
-  prompt,
-}: z.infer<typeof generateContractSchema>) {
+export async function generateAIDraftContract(input: any) {
+  // Use generateContractSchema in call site
   const session = await getAuthSession();
   if (!session) throw new Error("Unauthorized");
 
   const model = DEFAULT_OPENAI_MODEL;
 
-  const systemPrompt = `You are a legal AI assistant tasked with drafting a legally sound "${contractType}" between the following parties: ${parties}. The following terms and key variables should be included: ${variables}.
-${prompt ? "Additional instructions: " + prompt : ""}
+  const systemPrompt = `You are a legal AI assistant tasked with drafting a legally sound "${input.contractType}" between the following parties: ${input.parties}. The following terms and key variables should be included: ${input.variables}.
+${input.prompt ? "Additional instructions: " + input.prompt : ""}
 Format with components: title, preamble, clauses, signature section. Do not include sample data beyond what is provided. Write in clear, professional English.`;
 
   const openai = getOpenAIClient();
