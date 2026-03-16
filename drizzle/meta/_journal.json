@@ -8,6 +8,13 @@
       "when": 1773430868554,
       "tag": "0000_minor_crusher_hogan",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1773432868554,
+      "tag": "0001_add_contracts_clients_activity",
+      "breakpoints": true
     }
   ]
 }
