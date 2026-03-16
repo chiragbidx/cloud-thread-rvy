@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, uniqueIndex, boolean, jsonb } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
 export const users = pgTable("users", {
@@ -75,4 +75,62 @@ export const teamInvitations = pgTable("team_invitations", {
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
+});
+
+// NEW: Clients Table
+export const clients = pgTable("clients", {
+  id: text("id").notNull().default(sql`gen_random_uuid()`).primaryKey(),
+  teamId: text("team_id").notNull().references(() => teams.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  contactEmail: text("contact_email").notNull(),
+  company: text("company"),
+  notes: text("notes"),
+  archivedAt: timestamp("archived_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// CONTRACT ENUMS
+// Contract status: draft | pending_signature | signed | archived
+export const contractStatus = [
+  "draft",
+  "pending_signature",
+  "signed",
+  "archived",
+] as const;
+
+// Contracts Table
+export const contracts = pgTable("contracts", {
+  id: text("id").notNull().default(sql`gen_random_uuid()`).primaryKey(),
+  teamId: text("team_id").notNull().references(() => teams.id, { onDelete: "cascade" }),
+  clientId: text("client_id").notNull().references(() => clients.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  contractType: text("contract_type").notNull(),
+  content: text("content").notNull(),
+  status: text("status", { enum: contractStatus }).notNull().default("draft"),
+  generatedByAI: boolean("generated_by_ai").notNull().default(false),
+  aiPrompt: text("ai_prompt"),
+  aiModel: text("ai_model"),
+  archivedAt: timestamp("archived_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// Activity action enum: generated | edited | status_changed | archived
+export const activityAction = [
+  "generated",
+  "edited",
+  "status_changed",
+  "archived",
+] as const;
+
+// Contract Activity Table
+export const contractActivities = pgTable("contract_activities", {
+  id: text("id").notNull().default(sql`gen_random_uuid()`).primaryKey(),
+  contractId: text("contract_id").notNull().references(() => contracts.id, { onDelete: "cascade" }),
+  teamId: text("team_id").notNull().references(() => teams.id, { onDelete: "cascade" }),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  action: text("action", { enum: activityAction }).notNull(),
+  details: jsonb("details").notNull().default(sql`'{}'`),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
