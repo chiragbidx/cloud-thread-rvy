@@ -1,7 +1,4 @@
 {
-  // ...keep all existing fields, add uuid to dependencies section...
   "dependencies": {
-    // ...existing dependencies...
-    "uuid": "^9.0.0"
   }
 }
