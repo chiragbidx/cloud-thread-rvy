@@ -4,7 +4,6 @@ import { z } from "zod";
 import { db } from "@/lib/db/client";
 import { clients } from "@/lib/db/schema";
 import { getAuthSession } from "@/lib/auth/session";
-import { v4 as uuidv4 } from "uuid";
 import { eq, and, desc, ilike } from "drizzle-orm";
 
 export const clientInputSchema = z.object({
@@ -21,7 +20,7 @@ export async function createClient(input: z.infer<typeof clientInputSchema>) {
   const validated = clientInputSchema.safeParse(input);
   if (!validated.success) return { error: validated.error.message };
 
-  const clientId = uuidv4();
+  const clientId = crypto.randomUUID();
   await db.insert(clients).values({
     id: clientId,
     name: validated.data.name,
